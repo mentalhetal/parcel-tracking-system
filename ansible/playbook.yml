@@ -14,14 +14,21 @@
         name: pm2
         global: yes
 
-    - name: Copy backend code
-      copy:
-        src: ../backend/
-        dest: /home/ec2-user/backend/
-        owner: ec2-user
-        group: ec2-user
-        mode: preserve
+    - name: Create backend archive (on GitHub Actions runner)
+      delegate_to: localhost
+      run_once: true
+      shell: tar -czf backend.tar.gz -C ../backend .
 
+    - name: Upload backend archive to EC2
+      copy:
+        src: backend.tar.gz
+        dest: /home/ec2-user/backend.tar.gz
+
+    - name: Extract backend code on EC2
+      shell: |
+        rm -rf /home/ec2-user/backend
+        mkdir -p /home/ec2-user/backend
+        tar -xzf /home/ec2-user/backend.tar.gz -C /home/ec2-user/backend
 
     - name: Install backend dependencies
       shell: npm install
@@ -35,6 +42,7 @@
         pm2 save
       args:
         chdir: /home/ec2-user/backend/
+
 
 - name: Deploy Frontend (via nginx)
   hosts: frontend
@@ -58,14 +66,21 @@
         state: started
         enabled: true
 
-    - name: Copy frontend source code
-      copy:
-        src: ../frontend/
-        dest: /home/ec2-user/frontend/
-        owner: ec2-user
-        group: ec2-user
-        mode: preserve
+    - name: Create frontend archive (on GitHub Actions runner)
+      delegate_to: localhost
+      run_once: true
+      shell: tar -czf frontend.tar.gz -C ../frontend .
 
+    - name: Upload frontend archive to EC2
+      copy:
+        src: frontend.tar.gz
+        dest: /home/ec2-user/frontend.tar.gz
+
+    - name: Extract frontend code on EC2
+      shell: |
+        rm -rf /home/ec2-user/frontend
+        mkdir -p /home/ec2-user/frontend
+        tar -xzf /home/ec2-user/frontend.tar.gz -C /home/ec2-user/frontend
 
     - name: Install frontend dependencies
       shell: npm install
