@@ -8,6 +8,13 @@ const DriverPage = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const name = localStorage.getItem('driverName');
+    if (name) {
+      navigate('/start-delivery');
+    }
+  }, [navigate]);
+	
   const handleAuth = async () => {
     if (!name || !password) {
       alert('이름과 비밀번호를 입력하세요.');
