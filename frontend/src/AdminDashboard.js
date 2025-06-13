@@ -76,6 +76,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const updateDeliveryStatus = async (id, newStatus) => {
     try {
       await axios.patch(`${API_BASE}/api/deliveries/${id}`, {
