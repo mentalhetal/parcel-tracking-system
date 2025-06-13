@@ -14,11 +14,6 @@
         name: pm2
         global: yes
 
-    - name: Create backend archive (on GitHub Actions runner)
-      delegate_to: localhost
-      run_once: true
-      shell: tar -czf backend.tar.gz -C ../backend .
-
     - name: Upload backend archive to EC2
       copy:
         src: backend.tar.gz
@@ -59,15 +54,6 @@
         state: started
         enabled: true
 
-    - name: Compress frontend build locally (GitHub Actions)
-      delegate_to: localhost
-      run_once: true
-      shell: |
-        cd ../frontend
-        npm ci
-        npm run build
-        tar -czf frontend-build.tar.gz -C build .
-
     - name: Upload frontend build archive to EC2
       copy:
         src: frontend-build.tar.gz
@@ -78,7 +64,7 @@
         mkdir -p /usr/share/nginx/html
         tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
-    - name: Configure nginx for SPA (optional)
+    - name: Configure nginx for SPA
       copy:
         src: ./nginx.conf
         dest: /etc/nginx/nginx.conf
