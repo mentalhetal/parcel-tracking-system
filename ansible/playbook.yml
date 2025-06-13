@@ -1,0 +1,94 @@
+- name: Deploy Backend
+  hosts: backend
+  become: true
+  tasks:
+    - name: Install Node.js and npm
+      yum:
+        name:
+          - nodejs
+          - npm
+        state: present
+
+    - name: Install PM2 globally
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Copy backend code
+      synchronize:
+        src: ../backend/
+        dest: /home/ec2-user/backend/
+        delete: yes
+
+    - name: Install backend dependencies
+      shell: npm install
+      args:
+        chdir: /home/ec2-user/backend/
+
+    - name: Start backend with PM2
+      shell: |
+        pm2 delete parcel-backend || true
+        pm2 start server.js --name parcel-backend
+        pm2 save
+      args:
+        chdir: /home/ec2-user/backend/
+
+---
+
+- name: Deploy Frontend (via nginx)
+  hosts: frontend
+  become: true
+  tasks:
+    - name: Install Node.js and npm
+      yum:
+        name:
+          - nodejs
+          - npm
+        state: present
+
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Copy frontend source code
+      synchronize:
+        src: ../frontend/
+        dest: /home/ec2-user/frontend/
+        delete: yes
+
+    - name: Install frontend dependencies
+      shell: npm install
+      args:
+        chdir: /home/ec2-user/frontend/
+
+    - name: Build frontend
+      shell: npm run build
+      args:
+        chdir: /home/ec2-user/frontend/
+
+    - name: Deploy built frontend to nginx root
+      copy:
+        src: /home/ec2-user/frontend/build/
+        dest: /usr/share/nginx/html/
+        remote_src: yes
+
+    - name: Configure nginx for SPA (optional)
+      copy:
+        src: ./nginx.conf
+        dest: /etc/nginx/nginx.conf
+        backup: yes
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
