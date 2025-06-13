@@ -15,10 +15,13 @@
         global: yes
 
     - name: Copy backend code
-      synchronize:
+      copy:
         src: ../backend/
         dest: /home/ec2-user/backend/
-        delete: yes
+        owner: ec2-user
+        group: ec2-user
+        mode: preserve
+
 
     - name: Install backend dependencies
       shell: npm install
