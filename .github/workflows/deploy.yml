@@ -21,13 +21,19 @@ jobs:
         working-directory: ./frontend
         run: |
           npm ci
-          npm run build
+          CI=false npm run build
 
       - name: Compress frontend build
         run: tar -czf frontend-build.tar.gz -C frontend/build .
 
+      - name: Move frontend build archive into ansible folder
+        run: mv frontend-build.tar.gz ansible/
+
       - name: Compress backend source
         run: tar -czf backend.tar.gz -C backend .
+
+      - name: Move backend archive into ansible folder
+        run: mv backend.tar.gz ansible/
 
       - name: Set up SSH keys
         run: |
