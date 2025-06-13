@@ -1,0 +1,5 @@
+[backend]
+10.30.6.59 ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@43.200.176.211"'
+
+[frontend]
+10.30.4.195 ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@43.200.176.211"'
