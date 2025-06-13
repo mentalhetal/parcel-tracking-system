@@ -48,13 +48,6 @@
   hosts: frontend
   become: true
   tasks:
-    - name: Install Node.js and npm
-      yum:
-        name:
-          - nodejs
-          - npm
-        state: present
-
     - name: Install nginx
       yum:
         name: nginx
@@ -66,37 +59,24 @@
         state: started
         enabled: true
 
-    - name: Create frontend archive (on GitHub Actions runner)
+    - name: Compress frontend build locally (GitHub Actions)
       delegate_to: localhost
       run_once: true
-      shell: tar -czf frontend.tar.gz -C ../frontend .
-
-    - name: Upload frontend archive to EC2
-      copy:
-        src: frontend.tar.gz
-        dest: /home/ec2-user/frontend.tar.gz
-
-    - name: Extract frontend code on EC2
       shell: |
-        rm -rf /home/ec2-user/frontend
-        mkdir -p /home/ec2-user/frontend
-        tar -xzf /home/ec2-user/frontend.tar.gz -C /home/ec2-user/frontend
+        cd ../frontend
+        npm ci
+        npm run build
+        tar -czf frontend-build.tar.gz -C build .
 
-    - name: Install frontend dependencies
-      shell: npm install
-      args:
-        chdir: /home/ec2-user/frontend/
-
-    - name: Build frontend
-      shell: npm run build
-      args:
-        chdir: /home/ec2-user/frontend/
-
-    - name: Deploy built frontend to nginx root
+    - name: Upload frontend build archive to EC2
       copy:
-        src: /home/ec2-user/frontend/build/
-        dest: /usr/share/nginx/html/
-        remote_src: yes
+        src: frontend-build.tar.gz
+        dest: /home/ec2-user/frontend-build.tar.gz
+
+    - name: Extract frontend build on EC2
+      shell: |
+        mkdir -p /usr/share/nginx/html
+        tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
     - name: Configure nginx for SPA (optional)
       copy:
