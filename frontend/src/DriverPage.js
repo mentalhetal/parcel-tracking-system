@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaLock, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaUser, FaLock } from 'react-icons/fa';
 import axios from 'axios'; // ← 추가
 
 const DriverPage = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    const name = localStorage.getItem('driverName');
-    if (name) {
-      navigate('/start-delivery');
-    }
-  }, []);
 
   const handleAuth = async () => {
     if (!name || !password) {
