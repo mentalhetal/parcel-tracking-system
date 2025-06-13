@@ -12,20 +12,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Ansible and rsync
+      - name: Set up Node.js for frontend build
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build React frontend
+        working-directory: ./frontend
         run: |
-          sudo apt update
-          sudo apt install -y ansible rsync
+          npm ci
+          npm run build
+
+      - name: Compress frontend build
+        run: tar -czf frontend-build.tar.gz -C frontend/build .
+
+      - name: Compress backend source
+        run: tar -czf backend.tar.gz -C backend .
 
       - name: Set up SSH keys
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
           chmod 600 ~/.ssh/seoul.key.pem
-          ssh-keyscan -H 3.34.2.90 >> ~/.ssh/known_hosts || true
+          ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
         shell: bash
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
 
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml
+          ansible-playbook playbook.yml -i inventory
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
