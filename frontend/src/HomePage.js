@@ -12,11 +12,14 @@ import KakaoMap from "./components/KakaoMap";
 
 const HomePage = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [selectedCourier, setSelectedCourier] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [selectedCourierCode, setSelectedCourierCode] = useState("");
   const [couriers, setCouriers] = useState([]);
   const [status, setStatus] = useState("집하 중");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [detailedInfo, setDetailedInfo] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
