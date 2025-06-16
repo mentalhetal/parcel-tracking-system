@@ -42,7 +42,7 @@ jobs:
       - name: Create firebase-service-key.json from secret
         run: |
           printf "%s" "${{ secrets.FIREBASE_SERVICE_KEY_JSON }}" > ansible/firebase-service-key.json
-          mv firebase-service-key.json ansible/
+
 
       - name: Set up SSH keys
         run: |
