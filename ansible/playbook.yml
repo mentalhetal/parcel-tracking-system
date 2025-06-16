@@ -71,6 +71,11 @@
         mkdir -p /usr/share/nginx/html
         tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
+    - name: Remove default nginx config (if exists)
+      file:
+        path: /etc/nginx/conf.d/default.conf
+        state: absent
+
     - name: Configure nginx for SPA
       copy:
         src: ./nginx.conf
