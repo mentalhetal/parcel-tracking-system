@@ -46,6 +46,8 @@
       args:
         chdir: /home/ec2-user/backend/
 
+---
+
 - name: Deploy Frontend (via nginx)
   hosts: frontend
   become: true
