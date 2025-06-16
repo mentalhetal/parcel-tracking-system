@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const API_BASE = "http://192.168.1.11:4000";
+  const API_BASE_URL = "http://192.168.1.11:4000";
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -33,12 +33,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE}/api/admin/drivers`)
+      .get(`${API_BASE_URL}/api/admin/drivers`)
       .then((res) => setDrivers(res.data))
       .catch((err) => console.error("기사 목록 불러오기 실패:", err));
 
     axios
-      .get(`${API_BASE}/api/admin/deliveries`) // ✅ 백엔드 API 경로
+      .get(`${API_BASE_URL}/api/admin/deliveries`) // ✅ 백엔드 API 경로
       .then((res) => setDeliveries(res.data))
       .catch((err) => console.error("배송 목록 불러오기 실패:", err));
   }, []);
@@ -53,14 +53,14 @@ const AdminDashboard = () => {
     if (!name || !phone || !password || !region) return;
 
     try {
-      await axios.post(`${API_BASE}/api/admin/drivers`, {
+      await axios.post(`${API_BASE_URL}/api/admin/drivers`, {
         name,
         phone,
         password,
         region,
       });
       setNewDriver({ name: "", phone: "", password: "", region: "" });
-      const res = await axios.get(`${API_BASE}/api/admin/drivers`);
+      const res = await axios.get(`${API_BASE_URL}/api/admin/drivers`);
       setDrivers(res.data);
     } catch (err) {
       console.error("추가 실패:", err);
@@ -70,8 +70,8 @@ const AdminDashboard = () => {
   const removeDriver = async (index) => {
     const target = drivers[index];
     if (target?.id) {
-      await axios.delete(`${API_BASE}/api/admin/drivers/${target.id}`);
-      const res = await axios.get(`${API_BASE}/api/admin/drivers`);
+      await axios.delete(`${API_BASE_URL}/api/admin/drivers/${target.id}`);
+      const res = await axios.get(`${API_BASE_URL}/api/admin/drivers`);
       setDrivers(res.data);
     }
   };
@@ -79,10 +79,10 @@ const AdminDashboard = () => {
   // eslint-disable-next-line no-unused-vars
   const updateDeliveryStatus = async (id, newStatus) => {
     try {
-      await axios.patch(`${API_BASE}/api/deliveries/${id}`, {
+      await axios.patch(`${API_BASE_URL}/api/deliveries/${id}`, {
         driver_status: newStatus,
       });
-      const res = await axios.get(`${API_BASE}/api/admin/deliveries`);
+      const res = await axios.get(`${API_BASE_URL}/api/admin/deliveries`);
       setDeliveries(res.data);
     } catch (error) {
       console.error("배송 상태 업데이트 실패:", error);
