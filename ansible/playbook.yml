@@ -110,7 +110,7 @@
 
     - name: Configure nginx for SPA (conf.d 방식)
       copy:
-        src: ./spa.conf
+        src: ./spa.conf.j2
         dest: /etc/nginx/conf.d/spa.conf
         owner: root
         group: root
