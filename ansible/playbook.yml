@@ -84,6 +84,16 @@
         state: started
         enabled: true
 
+    - name: Remove existing frontend directory completely
+      file:
+        path: /usr/share/nginx/html
+        state: absent
+
+    - name: Recreate html directory
+      file:
+        path: /usr/share/nginx/html
+        state: directory
+
     - name: Upload frontend build archive to EC2
       copy:
         src: frontend-build.tar.gz
@@ -91,8 +101,6 @@
 
     - name: Extract frontend build on EC2
       shell: |
-        rm -rf /usr/share/nginx/html/*
-        mkdir -p /usr/share/nginx/html
         tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
     - name: Remove default nginx config (if exists)
