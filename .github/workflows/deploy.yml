@@ -22,8 +22,7 @@ jobs:
           node-version: '18'
 
       - name: Create .env.production for frontend
-        run: |
-          echo "REACT_APP_API_URL=https://dev.classpick.click/api" > frontend/.env.production
+        run: echo "REACT_APP_API_URL=/api" > frontend/.env.production
 
       - name: Build React frontend
         working-directory: ./frontend
