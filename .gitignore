@@ -1,0 +1,18 @@
+# === Ansible-related ===
+ansible/backend.tar.gz
+ansible/frontend-build.tar.gz
+ansible/firebase-service-key.json
+ansible/inventory/hosts
+
+# === Secrets / Credentials ===
+*.pem
+.ssh/
+.env
+
+# === Node modules ===
+frontend/node_modules/
+backend/node_modules/
+
+# === System / Cache ===
+.DS_Store
+.cache/
