@@ -23,9 +23,7 @@ jobs:
 
       - name: Create .env.production for frontend
         run: |
-          cat <<EOF > frontend/.env.production
-          REACT_APP_API_URL=https://dev.classpick.click/api
-          EOF
+          echo "REACT_APP_API_URL=https://dev.classpick.click/api" > frontend/.env.production
 
       - name: Build React frontend
         working-directory: ./frontend
