@@ -24,7 +24,7 @@ const DriverPage = () => {
     }
 
     try {
-      const res = await axios.post('${API_BASE_URL}/api/driver-login', {
+      const res = await axios.post('${API_BASE_URL}/driver-login', {
 	name: name.trim(),
         password: password.trim()
       });
