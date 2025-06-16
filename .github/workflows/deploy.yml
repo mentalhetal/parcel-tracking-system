@@ -43,7 +43,7 @@ jobs:
       - name: Set up SSH keys
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
+          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
           chmod 600 ~/.ssh/seoul.key.pem
           ssh-keyscan -H ${{ vars.BASTION_PUBLIC_IP }} >> ~/.ssh/known_hosts
         shell: bash
