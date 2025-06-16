@@ -91,7 +91,8 @@
       failed_when: nginx_test.rc != 0
       ignore_errors: false
 
-    - name: Reload nginx
+    - name: Restart nginx
       service:
         name: nginx
-        state: reloaded
+        state: restarted
+
