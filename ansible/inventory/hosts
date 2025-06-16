@@ -1,5 +1,5 @@
 [backend]
-${{ secrets.BACKEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ secrets.BASTION_PUBLIC_IP }}"'
+${{ vars.BACKEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_IP }}"'
 
 [frontend]
-${{ secrets.FRONTEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ secrets.BASTION_PUBLIC_IP }}"'
+${{ vars.FRONTEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_IP }}"'
