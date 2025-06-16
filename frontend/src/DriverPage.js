@@ -8,6 +8,8 @@ const DriverPage = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
   useEffect(() => {
     const name = localStorage.getItem('driverName');
     if (name) {
@@ -22,7 +24,7 @@ const DriverPage = () => {
     }
 
     try {
-      const res = await axios.post('http://192.168.1.11:4000/api/driver-login', {
+      const res = await axios.post('${API_BASE_URL}/api/driver-login', {
 	name: name.trim(),
         password: password.trim()
       });
