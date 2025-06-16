@@ -35,6 +35,11 @@ jobs:
       - name: Move backend archive into ansible folder
         run: mv backend.tar.gz ansible/
 
+      - name: Create firebase-service-key.json from secret
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_KEY_JSON }}" > firebase-service-key.json
+          mv firebase-service-key.json ansible/
+
       - name: Set up SSH keys
         run: |
           mkdir -p ~/.ssh
