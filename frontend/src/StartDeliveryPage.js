@@ -7,7 +7,8 @@ const StartDeliveryPage = () => {
   const [filter, setFilter] = useState('전체');
   const navigate = useNavigate();
   const driverName = localStorage.getItem('driverName') || '기사';
-
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+	
   useEffect(() => {
     const name = localStorage.getItem('driverName');
     if (!name) {
@@ -18,7 +19,7 @@ const StartDeliveryPage = () => {
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const res = await fetch(`http://192.168.1.11:4000/api/deliveries?driver=${driverName}`);
+        const res = await fetch(`${API_BASE_URL}/api/deliveries?driver=${driverName}`);
         const data = await res.json();
 	console.log('배송 데이터:', data);
         setDeliveries(data);
@@ -45,7 +46,7 @@ const StartDeliveryPage = () => {
     setDeliveries(updated);
 
     try {
-      await fetch(`http://192.168.1.11:4000/api/deliveries/${id}`, {
+      await fetch(`${API_BASE_URL}/api/deliveries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ driver_status: '완료' }),  // driver_status 수정
