@@ -12,6 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Test SSH to Bastion
+        run: |
+          nc -zv ${{ vars.BASTION_PUBLIC_IP }} 22 || echo "❌ Port 22 not reachable from GitHub Actions"
+
       - name: Set up Node.js for frontend build
         uses: actions/setup-node@v3
         with:
