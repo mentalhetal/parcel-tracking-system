@@ -8,6 +8,8 @@ const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
   
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -25,7 +27,7 @@ const AdminLogin = () => {
       const idToken = await userCredential.user.getIdToken(); // ID 토큰 가져오기
       
       // ✅ 백엔드로 ID 토큰 전송
-      const response = await axios.post("http://192.168.1.11:4000/api/admin-login", {
+      const response = await axios.post("${API_BASE_URL}/api/admin-login", {
         idToken
       });
       
