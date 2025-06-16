@@ -21,6 +21,12 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Create .env.production for frontend
+        run: |
+          cat <<EOF > frontend/.env.production
+          REACT_APP_API_URL=https://dev.classpick.click/api
+          EOF
+
       - name: Build React frontend
         working-directory: ./frontend
         run: |
@@ -44,7 +50,6 @@ jobs:
           cat <<EOF > ansible/firebase-service-key.json
           ${{ secrets.FIREBASE_SERVICE_KEY_JSON }}
           EOF
-
 
       - name: Set up SSH keys
         run: |
