@@ -14,13 +14,13 @@
         name: pm2
         global: yes
 
-    - name: Stop and delete old PM2 app if exists
+    - name: Kill all PM2 processes completely
       shell: |
-        pm2 delete parcel-backend || true
+        pm2 kill
       args:
         chdir: /home/ec2-user
 
-    - name: Remove existing backend directory (after PM2 cleanup)
+    - name: Remove existing backend directory
       file:
         path: /home/ec2-user/backend
         state: absent
@@ -68,7 +68,6 @@
       args:
         chdir: /home/ec2-user/backend/
       ignore_errors: yes
-
 
 - name: Deploy Frontend (via nginx)
   hosts: frontend
