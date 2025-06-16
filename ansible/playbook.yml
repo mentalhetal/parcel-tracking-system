@@ -20,11 +20,10 @@
         dest: /home/ec2-user/backend.tar.gz
 
     - name: Extract backend code on EC2
-      unarchive:
-        src: /home/ec2-user/backend.tar.gz
-        dest: /home/ec2-user/backend
-        remote_src: yes
-        extra_opts: [--strip-components=1]
+      shell: |
+        rm -rf /home/ec2-user/backend
+        mkdir -p /home/ec2-user/backend
+        tar -xzf /home/ec2-user/backend.tar.gz -C /home/ec2-user/backend
 
     - name: Upload Firebase service key
       copy:
@@ -83,11 +82,10 @@
         dest: /home/ec2-user/frontend-build.tar.gz
 
     - name: Extract frontend build on EC2
-      unarchive:
-        src: /home/ec2-user/frontend-build.tar.gz
-        dest: /usr/share/nginx/html
-        remote_src: yes
-        extra_opts: [--strip-components=1]
+      shell: |
+        rm -rf /usr/share/nginx/html/*
+        mkdir -p /usr/share/nginx/html
+        tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
     - name: Remove default nginx config (if exists)
       file:
