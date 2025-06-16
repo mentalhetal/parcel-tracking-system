@@ -19,7 +19,7 @@ const StartDeliveryPage = () => {
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/deliveries?driver=${driverName}`);
+        const res = await fetch(`${API_BASE_URL}/deliveries?driver=${driverName}`);
         const data = await res.json();
 	console.log('배송 데이터:', data);
         setDeliveries(data);
@@ -46,7 +46,7 @@ const StartDeliveryPage = () => {
     setDeliveries(updated);
 
     try {
-      await fetch(`${API_BASE_URL}/api/deliveries/${id}`, {
+      await fetch(`${API_BASE_URL}/deliveries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ driver_status: '완료' }),  // driver_status 수정
