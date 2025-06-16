@@ -1,3 +1,5 @@
+---
+
 - name: Deploy Backend
   hosts: backend
   become: true
@@ -15,8 +17,7 @@
         global: yes
 
     - name: Kill all PM2 processes completely
-      shell: |
-        pm2 kill
+      shell: pm2 kill
       args:
         chdir: /home/ec2-user
 
@@ -93,6 +94,9 @@
       file:
         path: /usr/share/nginx/html
         state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
     - name: Upload frontend build archive to EC2
       copy:
