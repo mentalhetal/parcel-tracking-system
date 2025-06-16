@@ -14,6 +14,17 @@
         name: pm2
         global: yes
 
+    - name: Stop and delete old PM2 app if exists
+      shell: |
+        pm2 delete parcel-backend || true
+      args:
+        chdir: /home/ec2-user
+
+    - name: Remove existing backend directory (after PM2 cleanup)
+      file:
+        path: /home/ec2-user/backend
+        state: absent
+
     - name: Upload backend archive to EC2
       copy:
         src: backend.tar.gz
@@ -21,7 +32,6 @@
 
     - name: Extract backend code on EC2
       shell: |
-        rm -rf /home/ec2-user/backend
         mkdir -p /home/ec2-user/backend
         tar -xzf /home/ec2-user/backend.tar.gz -C /home/ec2-user/backend
 
@@ -42,7 +52,6 @@
     - name: Start backend with PM2 (only if server.js exists)
       shell: |
         if [ -f server.js ]; then
-          pm2 delete parcel-backend || true
           pm2 start server.js --name parcel-backend
           pm2 save
         else
