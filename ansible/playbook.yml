@@ -94,7 +94,7 @@
 
     - name: Configure nginx for SPA (conf.d 방식)
       copy:
-        src: ./spa-nginx.conf
+        src: ./spa.conf
         dest: /etc/nginx/conf.d/spa.conf
         owner: root
         group: root
