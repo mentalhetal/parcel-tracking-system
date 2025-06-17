@@ -66,8 +66,12 @@ jobs:
       - name: Move frontend build archive into ansible folder
         run: mv frontend-build.tar.gz ansible/
 
-      - name: ✅ Run backend & check Prometheus metrics
-        if: github.ref_name == 'main'  # ✅ main 브랜치에서만 실행
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run backend & check Prometheus metrics
+        if: github.ref_name == 'main'
         run: |
           nohup node backend/server.js > backend.log 2>&1 &
           sleep 5
