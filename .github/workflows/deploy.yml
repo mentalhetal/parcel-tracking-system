@@ -119,3 +119,13 @@ jobs:
                           server_name=$SERVER_NAME"
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
+
+      - name: ✅ Check /metrics on both backend servers (prod only)
+        if: github.ref_name == 'main'
+        run: |
+          for ip in 10.20.5.51 10.20.6.91; do
+            echo "Checking http://$ip:4000/metrics"
+            curl -sf http://$ip:4000/metrics \
+              && echo "$ip: metrics OK" \
+              || (echo "$ip: /metrics failed" && exit 1)
+          done
