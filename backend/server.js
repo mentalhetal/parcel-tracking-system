@@ -4,8 +4,17 @@ const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const serviceAccount = require('./firebase-service-key.json'); // 🔑 서비스 계정 키
 
-// ✅ Prometheus client 추가
+// Prometheus 설정 시작
 const client = require('prom-client');
+const register = client.register;
+client.collectDefaultMetrics();
+
+const httpRequestCounter = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'code'],
+});
+// Prometheus 설정 끝
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -19,21 +28,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-// ✅ Prometheus 기본 메트릭 수집 + 요청 카운터 설정
-client.collectDefaultMetrics();
-const register = client.register;
-
-const httpRequestCounter = new client.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'code'],
-});
-
+// 요청 수 메트릭 기록 미들웨어
 app.use((req, res, next) => {
   res.once('finish', () => {
     httpRequestCounter.inc({
       method: req.method,
-      route: req.route?.path || req.originalUrl || req.path,
+      route: req.route?.path || req.path,
       code: res.statusCode,
     });
   });
@@ -276,7 +276,7 @@ app.get('/api/delivery-status', async (req, res) => {
   }
 });
 
-// ✅ /metrics 엔드포인트 추가
+// /metrics 엔드포인트
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
