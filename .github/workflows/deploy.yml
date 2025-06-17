@@ -2,7 +2,10 @@ name: Deploy via Ansible
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - dev
+      - test
 
 jobs:
   deploy:
@@ -12,9 +15,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set environment prefix from branch
+        id: env
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "prefix=PROD" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF##*/}" == "dev" ]]; then
+            echo "prefix=DEV" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF##*/}" == "test" ]]; then
+            echo "prefix=TEST" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Invalid branch"
+            exit 1
+          fi
+
       - name: Test SSH to Bastion
         run: |
-          nc -zv ${{ vars.BASTION_PUBLIC_DEV_IP }} 22 || echo "❌ Port 22 not reachable from GitHub Actions"
+          nc -zv ${{ vars["BASTION_PUBLIC_${{ steps.env.outputs.prefix }}_01_IP"] }} 22 || echo "❌ Bastion 1 not reachable"
+          nc -zv ${{ vars["BASTION_PUBLIC_${{ steps.env.outputs.prefix }}_02_IP"] }} 22 || echo "❌ Bastion 2 not reachable"
 
       - name: Set up Node.js for frontend build
         uses: actions/setup-node@v3
@@ -53,8 +71,8 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
           chmod 600 ~/.ssh/seoul.key.pem
-          ssh-keyscan -H ${{ vars.BASTION_PUBLIC_DEV_01_IP }} >> ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ vars.BASTION_PUBLIC_DEV_02_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ vars["BASTION_PUBLIC_${{ steps.env.outputs.prefix }}_01_IP"] }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ vars["BASTION_PUBLIC_${{ steps.env.outputs.prefix }}_02_IP"] }} >> ~/.ssh/known_hosts
         shell: bash
 
       - name: Install Ansible
@@ -64,20 +82,21 @@ jobs:
 
       - name: Generate Ansible inventory from repository variables
         run: |
+          PREFIX=${{ steps.env.outputs.prefix }}
           mkdir -p ansible/inventory
           cat <<EOF > ansible/inventory/hosts
           [backend]
-          ${{ vars.BACKEND_PRIVATE_DEV_01_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars.BASTION_PUBLIC_DEV_01_IP }}"'
-          ${{ vars.BACKEND_PRIVATE_DEV_02_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars.BASTION_PUBLIC_DEV_02_IP }}"'
+          ${{ vars["BACKEND_PRIVATE_${PREFIX}_01_IP"] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars["BASTION_PUBLIC_${PREFIX}_01_IP"] }}"'
+          ${{ vars["BACKEND_PRIVATE_${PREFIX}_02_IP"] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars["BASTION_PUBLIC_${PREFIX}_02_IP"] }}"'
 
           [frontend]
-          ${{ vars.FRONTEND_PRIVATE_DEV_01_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars.BASTION_PUBLIC_DEV_01_IP }}"'
-          ${{ vars.FRONTEND_PRIVATE_DEV_02_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars.BASTION_PUBLIC_DEV_02_IP }}"'
+          ${{ vars["FRONTEND_PRIVATE_${PREFIX}_01_IP"] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars["BASTION_PUBLIC_${PREFIX}_01_IP"] }}"'
+          ${{ vars["FRONTEND_PRIVATE_${PREFIX}_02_IP"] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -i ~/.ssh/seoul.key.pem ec2-user@${{ vars["BASTION_PUBLIC_${PREFIX}_02_IP"] }}"'
           EOF
 
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml -i inventory --extra-vars "backend_private_ip=${{ vars.BACKEND_PRIVATE_DEV_02_IP }}"
+          ansible-playbook playbook.yml -i inventory --extra-vars "backend_private_ip=${{ vars["BACKEND_PRIVATE_${{ steps.env.outputs.prefix }}_02_IP"] }}"
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
