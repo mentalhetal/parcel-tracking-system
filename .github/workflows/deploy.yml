@@ -30,6 +30,16 @@ jobs:
             exit 1
           fi
 
+      - name: Set server_name based on prefix
+        run: |
+          if [[ "${{ steps.env.outputs.prefix }}" == "DEV" ]]; then
+            echo "SERVER_NAME=dev.classpick.click" >> $GITHUB_ENV
+          elif [[ "${{ steps.env.outputs.prefix }}" == "TEST" ]]; then
+            echo "SERVER_NAME=test.classpick.click" >> $GITHUB_ENV
+          else
+            echo "SERVER_NAME=prod.classpick.click" >> $GITHUB_ENV
+          fi
+
       - name: Test SSH to Bastion
         run: |
           echo "🔗 Testing SSH to Bastions"
@@ -99,7 +109,7 @@ jobs:
           cd ansible
           ansible-playbook playbook.yml -i inventory \
             --extra-vars "backend_private_ip=${{ vars[format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} \
-                    backend_port=4000 \
-                    server_name=${{ steps.env.outputs.prefix == 'DEV' && 'dev.classpick.click' || steps.env.outputs.prefix == 'TEST' && 'test.classpick.click' || 'prod.classpick.click' }}"
+                          backend_port=4000 \
+                          server_name=$SERVER_NAME"
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
