@@ -34,8 +34,9 @@ jobs:
           nc -zv ${{ env.BASTION_01 }} 22 || echo "❌ Bastion 1 not reachable"
           nc -zv ${{ env.BASTION_02 }} 22 || echo "❌ Bastion 2 not reachable"
         env:
-          BASTION_01: ${{ vars['BASTION_PUBLIC_' + steps.env.outputs.prefix + '_01_IP'] }}
-          BASTION_02: ${{ vars['BASTION_PUBLIC_' + steps.env.outputs.prefix + '_02_IP'] }}
+          PREFIX: ${{ steps.env.outputs.prefix }}
+          BASTION_01: ${{ format('BASTION_PUBLIC_{0}_01_IP', steps.env.outputs.prefix) }}
+          BASTION_02: ${{ format('BASTION_PUBLIC_{0}_02_IP', steps.env.outputs.prefix) }}
 
       - name: Set up Node.js for frontend build
         uses: actions/setup-node@v3
@@ -74,12 +75,13 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
           chmod 600 ~/.ssh/seoul.key.pem
-          ssh-keyscan -H "$BASTION_01" >> ~/.ssh/known_hosts
-          ssh-keyscan -H "$BASTION_02" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ vars[env.BASTION_01] }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ vars[env.BASTION_02] }}" >> ~/.ssh/known_hosts
         shell: bash
         env:
-          BASTION_01: ${{ vars['BASTION_PUBLIC_' + steps.env.outputs.prefix + '_01_IP'] }}
-          BASTION_02: ${{ vars['BASTION_PUBLIC_' + steps.env.outputs.prefix + '_02_IP'] }}
+          PREFIX: ${{ steps.env.outputs.prefix }}
+          BASTION_01: ${{ format('BASTION_PUBLIC_{0}_01_IP', steps.env.outputs.prefix) }}
+          BASTION_02: ${{ format('BASTION_PUBLIC_{0}_02_IP', steps.env.outputs.prefix) }}
 
       - name: Install Ansible
         run: |
@@ -103,7 +105,8 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml -i inventory --extra-vars "backend_private_ip=${{ vars["BACKEND_PRIVATE_$BACKEND_PRIVATE_02"] }}"
+          ansible-playbook playbook.yml -i inventory --extra-vars "backend_private_ip=${{ vars[env.BACKEND_02] }}"
         env:
+          PREFIX: ${{ steps.env.outputs.prefix }}
+          BACKEND_02: ${{ format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix) }}
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          BACKEND_PRIVATE_02: ${{ vars['BACKEND_PRIVATE_' + steps.env.outputs.prefix + '_02_IP'] }}
