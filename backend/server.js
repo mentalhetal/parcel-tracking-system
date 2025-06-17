@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const serviceAccount = require('./firebase-service-key.json'); // 🔑 서비스 계정 키
 
+// ✅ Prometheus client 추가
+const client = require('prom-client');
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://soldesk-46a18-default-rtdb.firebaseio.com'
@@ -15,6 +18,27 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+
+// ✅ Prometheus 기본 메트릭 수집 + 요청 카운터 설정
+client.collectDefaultMetrics();
+const register = client.register;
+
+const httpRequestCounter = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'code'],
+});
+
+app.use((req, res, next) => {
+  res.once('finish', () => {
+    httpRequestCounter.inc({
+      method: req.method,
+      route: req.route?.path || req.originalUrl || req.path,
+      code: res.statusCode,
+    });
+  });
+  next();
+});
 
 // Firebase 인증 객체 가져오기
 const auth = admin.auth();
@@ -250,6 +274,12 @@ app.get('/api/delivery-status', async (req, res) => {
     console.error('🚨 서버 오류:', error);
     res.status(500).json({ error: '서버 오류' });
   }
+});
+
+// ✅ /metrics 엔드포인트 추가
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 const PORT = 4000;
