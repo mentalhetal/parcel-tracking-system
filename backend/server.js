@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const serviceAccount = require('./firebase-service-key.json'); // 🔑 서비스 계정 키
+const sendEmailFromDB = require('./sendEmailFromDB'); // 이메일 전송 유틸
 
 // Prometheus 설정 시작
 const client = require('prom-client');
@@ -208,6 +209,18 @@ app.get('/api/deliveries', async (req, res) => {
   }
 });
 
+app.post('/api/deliveries/:id/start', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await sendEmailFromDB(id, '📦 배송 시작 알림', '2시간 이내에 택배가 도착합니다.');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('🚨 배송 시작 알림 실패:', error);
+    res.status(500).json({ success: false, message: '이메일 전송 실패' });
+  }
+});
+
 // 배송 상태 변경 (PATCH 요청 처리)
 app.patch('/api/deliveries/:id', async (req, res) => {
   const { id } = req.params;  // 요청 URL에서 배송 ID 추출
@@ -223,6 +236,8 @@ app.patch('/api/deliveries/:id', async (req, res) => {
       driver_status: '완료',
       status: '배송 완료' // ✅ 여기 추가
     });
+
+    await sendEmailFromDB(id, '📦 배송 완료 알림', '택배가 도착했습니다.');
 
     // 성공적으로 업데이트 후 응답
     res.status(200).json({ message: '배송 상태가 완료로 업데이트되었습니다.' });
