@@ -75,6 +75,6 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml -i inventory --extra-vars "BACKEND_PRIVATE_DEV_02_IP=${{ vars.BACKEND_PRIVATE_DEV_02_IP }}"
+          ansible-playbook playbook.yml -i inventory --extra-vars "backend_private_ip=${{ vars.BACKEND_PRIVATE_DEV_02_IP }}"
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
