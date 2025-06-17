@@ -1,7 +1,7 @@
 server {
     listen 80;
-    server_name dev.classpick.click test.classpick.click prod.classpick.click;
-
+    server_name {{ server_name }};
+    
     root /usr/share/nginx/html;
     index index.html;
 
@@ -10,7 +10,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://{{ backend_private_ip }}:4000;
+        proxy_pass http://{{ backend_private_ip }}:{{ backend_port }};
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
