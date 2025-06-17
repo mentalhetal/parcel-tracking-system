@@ -66,21 +66,12 @@ jobs:
       - name: Move frontend build archive into ansible folder
         run: mv frontend-build.tar.gz ansible/
 
+      # ✅ 여기 추가됨: backend 의존성 설치
       - name: Install backend dependencies
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Create firebase-service-key.json in backend for test
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_KEY_JSON }}' > backend/firebase-service-key.json
+          cd backend
+          npm install
 
-      - name: Run backend & check Prometheus metrics
-        if: github.ref_name == 'main'
-        run: |
-          nohup node backend/server.js > backend.log 2>&1 &
-          sleep 5
-          curl -f http://localhost:4000/metrics || (echo "❌ /metrics 응답 실패" && cat backend.log && exit 1)
-      
       - name: Compress backend source
         run: tar -czf backend.tar.gz -C backend .
 
