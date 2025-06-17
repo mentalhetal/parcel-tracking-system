@@ -14,7 +14,7 @@ jobs:
 
       - name: Test SSH to Bastion
         run: |
-          nc -zv ${{ vars.BASTION_PUBLIC_IP }} 22 || echo "❌ Port 22 not reachable from GitHub Actions"
+          nc -zv ${{ vars.BASTION_PUBLIC_DEV_IP }} 22 || echo "❌ Port 22 not reachable from GitHub Actions"
 
       - name: Set up Node.js for frontend build
         uses: actions/setup-node@v3
@@ -53,7 +53,7 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/seoul.key.pem
           chmod 600 ~/.ssh/seoul.key.pem
-          ssh-keyscan -H ${{ vars.BASTION_PUBLIC_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ vars.BASTION_PUBLIC_DEV_IP }} >> ~/.ssh/known_hosts
         shell: bash
 
       - name: Install Ansible
@@ -66,10 +66,10 @@ jobs:
           mkdir -p ansible/inventory
           cat <<EOF > ansible/inventory/hosts
           [backend]
-          ${{ vars.BACKEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_IP }}"'
+          ${{ vars.BACKEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_DEV_IP }}"'
 
           [frontend]
-          ${{ vars.FRONTEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_IP }}"'
+          ${{ vars.FRONTEND_PRIVATE_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/seoul.key.pem -W %h:%p ec2-user@${{ vars.BASTION_PUBLIC_DEV_IP }}"'
           EOF
 
       - name: Run Ansible Playbook
