@@ -70,6 +70,10 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
+      - name: Create firebase-service-key.json in backend for test
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_KEY_JSON }}' > backend/firebase-service-key.json
+
       - name: Run backend & check Prometheus metrics
         if: github.ref_name == 'main'
         run: |
