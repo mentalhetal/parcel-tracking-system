@@ -66,10 +66,10 @@ jobs:
       - name: Move frontend build archive into ansible folder
         run: mv frontend-build.tar.gz ansible/
 
-      # ✅ 여기 추가됨: backend 의존성 설치
       - name: Install backend dependencies
         run: |
           cd backend
+          rm -f package-lock.json  # 🔧 문제 방지
           npm install
           sudo chown -R $USER:$USER node_modules
 
