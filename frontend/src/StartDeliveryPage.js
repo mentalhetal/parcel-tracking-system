@@ -45,6 +45,11 @@ const StartDeliveryPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ driver_status: '배송중' }),
       });
+
+      // ✅ 이메일 알림 전송
+      await fetch(`${API_BASE_URL}/deliveries/${id}/start`, {
+        method: 'POST',
+      });
     } catch (error) {
       console.error('배송 시작 저장 실패:', error);
     }
