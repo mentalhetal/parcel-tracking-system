@@ -124,6 +124,14 @@
         backend_port: "{{ backend_port }}"
         server_name: "{{ server_name }}"
 
+    - name: Configure nginx for Prometheus stub_status
+      template:
+        src: prometheus_status.conf.j2
+        dest: /etc/nginx/conf.d/prometheus_status.conf
+        owner: root
+        group: root
+        mode: 0644
+
     - name: Test nginx config before restart
       shell: nginx -t
       register: nginx_test
