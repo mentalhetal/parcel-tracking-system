@@ -113,6 +113,9 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml -i inventory
+          ansible-playbook playbook.yml -i inventory \
+            --extra-vars "backend_private_ip=${{ vars[format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} \
+                          backend_port=4000 \
+                          server_name=$SERVER_NAME"
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
