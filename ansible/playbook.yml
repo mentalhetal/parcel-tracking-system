@@ -47,10 +47,16 @@
 
     - name: Install backend dependencies
       shell: |
-        rm -f package-lock.json
-        npm install
+        npm ci || npm install
       args:
         chdir: /home/ec2-user/backend/
+      register: npm_result
+      failed_when: npm_result.rc != 0
+      changed_when: false
+
+    - name: Show npm install logs (if any)
+      debug:
+        var: npm_result.stdout_lines
 
     - name: Start backend with PM2 (only if server.js exists)
       shell: |
