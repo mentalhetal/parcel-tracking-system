@@ -8,11 +8,11 @@ const StartDeliveryPage = () => {
   const navigate = useNavigate();
   const driverName = localStorage.getItem('driverName') || '기사';
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
-	
+
   useEffect(() => {
     const name = localStorage.getItem('driverName');
     if (!name) {
-      navigate('/driver'); // 로그인 안 되어 있으면 로그인 페이지로 이동
+      navigate('/driver');
     }
   }, [navigate]);
 
@@ -21,7 +21,6 @@ const StartDeliveryPage = () => {
       try {
         const res = await fetch(`${API_BASE_URL}/deliveries?driver=${driverName}`);
         const data = await res.json();
-	console.log('배송 데이터:', data);
         setDeliveries(data);
       } catch (error) {
         console.error('배송 데이터 불러오기 실패:', error);
@@ -29,11 +28,31 @@ const StartDeliveryPage = () => {
     };
 
     fetchDeliveries();
-  }, [driverName]);
+  }, [driverName, API_BASE_URL]);
+
+  const handleStart = async (id) => {
+    const selected = deliveries.find((item) => item.id === id);
+    if (!selected || selected.driver_status !== '미완료') return;
+
+    const updated = deliveries.map((item) =>
+      item.id === id ? { ...item, driver_status: '배송중' } : item
+    );
+    setDeliveries(updated);
+
+    try {
+      await fetch(`${API_BASE_URL}/deliveries/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driver_status: '배송중' }),
+      });
+    } catch (error) {
+      console.error('배송 시작 저장 실패:', error);
+    }
+  };
 
   const handleCheck = async (id) => {
-    const selected = deliveries.find(d => d.id === id);
-    if (!selected || selected.driver_status === '완료') return;
+    const selected = deliveries.find((item) => item.id === id);
+    if (!selected || selected.driver_status !== '배송중') return;
 
     const confirmResult = window.confirm(
       '✅ 정말로 이 배송을 완료 처리하시겠습니까?\n※ 한 번 완료하면 되돌릴 수 없습니다.'
@@ -49,16 +68,15 @@ const StartDeliveryPage = () => {
       await fetch(`${API_BASE_URL}/deliveries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driver_status: '완료' }),  // driver_status 수정
+        body: JSON.stringify({ driver_status: '완료' }),
       });
     } catch (error) {
-      console.error('상태 저장 실패:', error);
-      alert('서버 저장 실패! 나중에 다시 시도하세요.');
+      console.error('배송 완료 저장 실패:', error);
     }
   };
 
   const handleDetail = (item) => {
-    alert(`📦 배송지 상세 정보\n\n주소: ${item.address}\n상태: ${item.driver_status}`);  // driver_status 수정
+    alert(`📦 배송지 상세 정보\n\n주소: ${item.address}\n상태: ${item.driver_status}`);
   };
 
   const handleLogout = () => {
@@ -73,8 +91,7 @@ const StartDeliveryPage = () => {
 
   const filteredDeliveries = deliveries.filter((item) => {
     const matchSearch = item.address.includes(searchTerm);
-    const matchFilter =
-      filter === '전체' ? true : item.driver_status === filter;
+    const matchFilter = filter === '전체' ? true : item.driver_status === filter;
     return matchSearch && matchFilter;
   });
 
@@ -107,7 +124,6 @@ const StartDeliveryPage = () => {
         <h2>📦 오늘 배송 건수: <b>{deliveries.length}건</b></h2>
         <p>✅ 완료된 배송: <b>{completed.length}건</b></p>
 
-        {/* 진행률 바 */}
         <div style={{ width: 300, height: 16, backgroundColor: '#ddd', borderRadius: 8, marginTop: 8 }}>
           <div style={{
             width: `${progress}%`,
@@ -120,9 +136,8 @@ const StartDeliveryPage = () => {
         <p style={{ fontSize: 14, marginTop: 4 }}>{progress}% 완료됨</p>
       </div>
 
-      {/* 필터 버튼 */}
       <div style={{ margin: '30px 0 10px' }}>
-        {['전체', '미완료', '완료'].map((label) => (
+        {['전체', '미완료', '배송중', '완료'].map((label) => (
           <button
             key={label}
             onClick={() => setFilter(label)}
@@ -141,7 +156,6 @@ const StartDeliveryPage = () => {
         ))}
       </div>
 
-      {/* 검색 */}
       <input
         type="text"
         placeholder="배송지 검색 (주소)"
@@ -156,7 +170,6 @@ const StartDeliveryPage = () => {
         }}
       />
 
-      {/* 테이블 */}
       <div style={{ width: '100%', maxWidth: '1000px', overflowX: 'auto' }}>
         <table
           border="1"
@@ -173,30 +186,33 @@ const StartDeliveryPage = () => {
               <th>번호</th>
               <th>배송지</th>
               <th>상태</th>
+              <th>시작 체크</th>
               <th>완료 체크</th>
               <th>상세 정보</th>
             </tr>
           </thead>
           <tbody>
             {filteredDeliveries.map((item) => {
-              const rowColor = item.driver_status === '완료' ? '#e0e0e0' : '#fffde7'; // driver_status 수정
+              const rowColor = item.driver_status === '완료' ? '#e0e0e0' : '#fffde7';
               return (
-                <tr
-                  key={item.id}
-                  style={{
-                    backgroundColor: rowColor,
-                    height: '48px'
-                  }}
-                >
+                <tr key={item.id} style={{ backgroundColor: rowColor, height: '48px' }}>
                   <td>{item.id}</td>
                   <td>{item.address}</td>
-                  <td>{item.driver_status}</td> {/* driver_status 수정 */}
+                  <td>{item.driver_status}</td>
                   <td>
                     <input
                       type="checkbox"
-                      checked={item.driver_status === '완료'}  // driver_status 수정
+                      checked={item.driver_status === '배송중' || item.driver_status === '완료'}
+                      onChange={() => handleStart(item.id)}
+                      disabled={item.driver_status !== '미완료'}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={item.driver_status === '완료'}
                       onChange={() => handleCheck(item.id)}
-                      disabled={item.driver_status === '완료'}  // driver_status 수정
+                      disabled={item.driver_status !== '배송중'}
                     />
                   </td>
                   <td>
@@ -213,4 +229,3 @@ const StartDeliveryPage = () => {
 };
 
 export default StartDeliveryPage;
-
