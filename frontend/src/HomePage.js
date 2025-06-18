@@ -74,8 +74,9 @@ const HomePage = () => {
     try {
       // API 요청에서 택배사 코드와 운송장 번호를 전달
       const response = await axios.get(`${API_BASE_URL}/delivery-status`, {
-	  params: { tracking_number: trackingNumber },
+  	params: { tracking_number: trackingNumber },
       });
+
 
       const virtualStatus = response.data.status;
       let details = "";
