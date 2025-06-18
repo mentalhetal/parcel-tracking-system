@@ -225,24 +225,28 @@ app.post('/api/deliveries/:id/start', async (req, res) => {
 
 // 배송 상태 변경 (PATCH 요청 처리)
 app.patch('/api/deliveries/:id', async (req, res) => {
-  const { id } = req.params;  // 요청 URL에서 배송 ID 추출
-  const { driver_status } = req.body; // 요청 본문에서 새로운 상태 추출
+  const { id } = req.params;
+  const { driver_status } = req.body;
 
   const normalizedStatus = driver_status.trim().replace(/\s+/g, "");
-  if (!["완료", "배송완료"].includes(normalizedStatus)) {
-    return res.status(400).json({ error: '상태는 "배송 완료"여야 합니다.' });
-  }
 
   try {
-    await db.ref(`deliveries/${id}`).update({
-      driver_status: '완료',
-      status: '배송 완료' // ✅ 여기 추가
-    });
+    const updates = {};
 
-    await sendEmailFromDB(id, '📦 배송 완료 알림', '택배가 도착했습니다.');
+    if (normalizedStatus === "배송중") {
+      updates.driver_status = "배송중";
+      updates.status = "배송 중";
+    } else if (["완료", "배송완료"].includes(normalizedStatus)) {
+      updates.driver_status = "완료";
+      updates.status = "배송 완료";
+      await sendEmailFromDB(id, '📦 배송 완료 알림', '택배가 도착했습니다.');
+    } else {
+      return res.status(400).json({ error: '상태는 "배송중" 또는 "배송 완료"여야 합니다.' });
+    }
 
-    // 성공적으로 업데이트 후 응답
-    res.status(200).json({ message: '배송 상태가 완료로 업데이트되었습니다.' });
+    await db.ref(`deliveries/${id}`).update(updates);
+
+    res.status(200).json({ message: '배송 상태가 업데이트되었습니다.' });
   } catch (error) {
     console.error('🚨 상태 업데이트 실패:', error);
     res.status(500).json({ error: '서버 오류' });
