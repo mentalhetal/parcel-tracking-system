@@ -27,9 +27,6 @@ const HomePage = () => {
   
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
 
-  const withBase = (path) =>
-  `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
-
   const clickCountRef = useRef(0);
   const lastClickTimeRef = useRef(0);
 
@@ -51,7 +48,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCouriers = async () => {
       try {
-        const response = await axios.get(withBase('couriers'));
+        const response = await axios.get(`${API_BASE_URL}/couriers`);
         setCouriers(response.data); // 받아온 데이터 그대로 사용
       } catch (error) {
         console.error("🚨 택배사 데이터 불러오기 실패:", error);
@@ -76,7 +73,7 @@ const HomePage = () => {
 
     try {
       // API 요청에서 택배사 코드와 운송장 번호를 전달
-      const response = await axios.get(withBase('couriers'), {
+      const response = await axios.get(`${API_BASE_URL}/delivery-status`, {
 	  params: { tracking_number: trackingNumber },
       });
 
