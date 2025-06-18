@@ -70,7 +70,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
-          npm ci
+          npm install
           sudo chown -R $USER:$USER node_modules
 
       - name: Compress backend source
