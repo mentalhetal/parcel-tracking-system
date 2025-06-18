@@ -137,7 +137,7 @@
         mode: 0644
       vars:
         backend_private_ip: "{{ hostvars[inventory_hostname]['backend_target_ip'] }}"
-        backend_port: "{{ backend_port }}"
+        backend_port: 4000
         server_name: "{{ hostvars[inventory_hostname]['frontend_domain'] }}"
 
 
