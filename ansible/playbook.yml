@@ -136,9 +136,9 @@
         group: root
         mode: 0644
       vars:
-        backend_private_ip: "{{ hostvars[inventory_hostname]['backend_target_ip'] }}"
-        backend_port: 4000
-        server_name: "{{ hostvars[inventory_hostname]['frontend_domain'] }}"
+        backend_private_ip: "{{ backend_private_ip }}"
+        backend_port: "{{ backend_port }}"
+        server_name: "{{ server_name }}"
 
 
     - name: Test nginx config before restart
