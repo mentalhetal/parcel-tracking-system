@@ -105,17 +105,14 @@ jobs:
           ${{ vars[format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:22 -i ~/.ssh/seoul.key.pem ec2-user@${{ vars[format('BASTION_PUBLIC_{0}_02_IP', steps.env.outputs.prefix)] }}"'
 
           [frontend]
-          ${{ vars[format('FRONTEND_PRIVATE_{0}_01_IP', steps.env.outputs.prefix)] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:22 -i ~/.ssh/seoul.key.pem ec2-user@${{ vars[format('BASTION_PUBLIC_{0}_01_IP', steps.env.outputs.prefix)] }}"'
-          ${{ vars[format('FRONTEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:22 -i ~/.ssh/seoul.key.pem ec2-user@${{ vars[format('BASTION_PUBLIC_{0}_02_IP', steps.env.outputs.prefix)] }}"'
+          ${{ vars[format('FRONTEND_PRIVATE_{0}_01_IP', steps.env.outputs.prefix)] }} ansible_user=ec2-user backend_target_ip=${{ vars[format('BACKEND_PRIVATE_{0}_01_IP', steps.env.outputs.prefix)] }} frontend_domain=frontend01.${{ steps.env.outputs.prefix }}.classpick.click ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:22 -i ~/.ssh/seoul.key.pem ec2-user@${{ vars[format('BASTION_PUBLIC_{0}_01_IP', steps.env.outputs.prefix)] }}"'
+          ${{ vars[format('FRONTEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} ansible_user=ec2-user backend_target_ip=${{ vars[format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} frontend_domain=frontend02.${{ steps.env.outputs.prefix }}.classpick.click ansible_ssh_private_key_file=~/.ssh/seoul.key.pem ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:22 -i ~/.ssh/seoul.key.pem ec2-user@${{ vars[format('BASTION_PUBLIC_{0}_02_IP', steps.env.outputs.prefix)] }}"'
           EOF
         shell: bash
 
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ansible-playbook playbook.yml -i inventory \
-            --extra-vars "backend_private_ip=${{ vars[format('BACKEND_PRIVATE_{0}_02_IP', steps.env.outputs.prefix)] }} \
-                          backend_port=4000 \
-                          server_name=$SERVER_NAME"
+          ansible-playbook playbook.yml -i inventory
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
