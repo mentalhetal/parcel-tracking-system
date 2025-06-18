@@ -1,9 +1,18 @@
-const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 
+let admin;
+
+function initFirebase(firebaseAdminInstance) {
+  admin = firebaseAdminInstance;
+}
+
 async function sendEmailFromDB(deliveryId, subject, text) {
+  if (!admin) {
+    console.error('Firebase Admin SDK not initialized');
+    return;
+  }
+
   try {
-    // DB에서 deliveryId에 해당하는 데이터 조회
     const snapshot = await admin.database().ref(`deliveries/${deliveryId}`).once('value');
     const data = snapshot.val();
 
@@ -14,7 +23,6 @@ async function sendEmailFromDB(deliveryId, subject, text) {
 
     const to = data.user_email;
 
-    // 이메일 설정
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -23,7 +31,6 @@ async function sendEmailFromDB(deliveryId, subject, text) {
       }
     });
 
-    // 이메일 전송
     const info = await transporter.sendMail({
       from: '"배송 알림" <your.email@gmail.com>',
       to,
@@ -37,4 +44,4 @@ async function sendEmailFromDB(deliveryId, subject, text) {
   }
 }
 
-module.exports = sendEmailFromDB;
+module.exports = { sendEmailFromDB, initFirebase };
