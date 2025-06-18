@@ -116,6 +116,13 @@
       shell: |
         tar -xzf /home/ec2-user/frontend-build.tar.gz -C /usr/share/nginx/html
 
+    - name: Inject web instance ID into index.html
+      lineinfile:
+        path: /usr/share/nginx/html/index.html
+        insertafter: '<head>'
+        line: '<meta name="web-instance" content="{{ inventory_hostname }}" />'
+      when: "'frontend' in group_names"
+
     - name: Remove default nginx config (if exists)
       file:
         path: /etc/nginx/conf.d/default.conf
