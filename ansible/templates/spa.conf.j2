@@ -1,6 +1,10 @@
+# HTTPS 처리용 서버 블록
 server {
-    listen 80;
+    listen 443 ssl;
     server_name {{ server_name }};
+
+    ssl_certificate /etc/letsencrypt/live/{{ server_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ server_name }}/privkey.pem;
 
     root /usr/share/nginx/html;
     index index.html;
@@ -10,16 +14,22 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://{{ backend_private_ip }}:{{ backend_port }}/;
+        proxy_pass http://{{ backend_private_ip }}:{{ backend_port }}/api/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
-    # 👇 Prometheus용 stub_status
     location /nginx_status {
         stub_status;
         allow 127.0.0.1;
         deny all;
     }
+}
+
+# HTTP → HTTPS 리디렉션
+server {
+    listen 80;
+    server_name {{ server_name }};
+    return 301 https://$host$request_uri;
 }
