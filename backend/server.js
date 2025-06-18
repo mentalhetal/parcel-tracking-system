@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const serviceAccount = require('./firebase-service-key.json'); // 🔑 서비스 계정 키
-const sendEmailFromDB = require('./sendEmailFromDB'); // 이메일 전송 유틸
+const { sendEmailFromDB, initFirebase } = require('./sendEmailFromDB'); // 이메일 전송 유틸
 
 // Prometheus 설정 시작
 const client = require('prom-client');
@@ -21,6 +21,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://soldesk-46a18-default-rtdb.firebaseio.com'
 });
+
+initFirebase(admin);
 
 const db = admin.database();
 const app = express();
