@@ -298,7 +298,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 const PORT = 4000;
-app.listen(PORT, '0.0.0.0' () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ 백엔드 서버 실행 중: http://localhost:${PORT}`);
 });
 
