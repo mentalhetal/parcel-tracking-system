@@ -16,8 +16,10 @@
         name: pm2
         global: yes
 
-    - name: Kill all PM2 processes completely
-      shell: pm2 kill
+    - name: Kill all PM2 processes and reset PM2 state
+      shell: |
+        pm2 kill
+        rm -rf ~/.pm2
       args:
         chdir: /home/ec2-user
 
@@ -58,7 +60,7 @@
       debug:
         var: npm_result.stdout_lines
 
-    - name: Start backend with PM2 (only if server.js exists)
+    - name: Start backend with PM2 (clean start)
       shell: |
         if [ -f server.js ]; then
           pm2 start server.js --name parcel-backend
