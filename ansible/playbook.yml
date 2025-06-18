@@ -143,29 +143,3 @@
       service:
         name: nginx
         state: restarted
-
-    - name: Install Certbot and Nginx plugin
-      yum:
-        name:
-          - certbot
-          - python3-certbot-nginx
-        state: present
-
-    - name: Ensure nginx is running before certbot
-      service:
-        name: nginx
-        state: started
-
-    - name: Issue SSL certificate with Certbot
-      shell: |
-        certbot --nginx -d {{ server_name }} --non-interactive --agree-tos -m admin@{{ server_name }} --redirect
-      args:
-        creates: "/etc/letsencrypt/live/{{ server_name }}/fullchain.pem"
-
-    - name: Ensure certbot auto-renewal cron job exists
-      cron:
-        name: "Certbot renew"
-        job: "certbot renew --quiet --no-self-upgrade"
-        user: root
-        minute: "0"
-        hour: "3"
