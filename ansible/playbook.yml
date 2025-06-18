@@ -1,5 +1,4 @@
 ---
-
 - name: Deploy Backend
   hosts: backend
   become: true
@@ -16,7 +15,7 @@
         name: pm2
         global: yes
 
-    - name: Kill all PM2 processes and reset PM2 state
+    - name: Kill all PM2 processes and remove PM2 data
       shell: |
         pm2 kill
         rm -rf ~/.pm2
@@ -60,7 +59,7 @@
       debug:
         var: npm_result.stdout_lines
 
-    - name: Start backend with PM2 (clean start)
+    - name: Start backend with PM2 (only if server.js exists)
       shell: |
         if [ -f server.js ]; then
           pm2 start server.js --name parcel-backend
