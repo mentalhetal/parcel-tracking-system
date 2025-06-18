@@ -69,8 +69,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
-          rm -f package-lock.json  # 🔧 문제 방지
-          npm install
+          npm ci || npm install
           sudo chown -R $USER:$USER node_modules
 
       - name: Compress backend source
