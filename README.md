@@ -4,7 +4,7 @@
  - 2025년 6월 04 ~ 2025년 6월 12일 (수정 기간 : 12 ~ 18일)
 
 2. 참여 인원
- - 2명
+ - 프론트엔드 1명, 백엔드 1명, CI/CD 공통
 
 3. 사용한 기술
  - git, git Actions, React.js, JavaScript, css, Node.js + Express, pm2
